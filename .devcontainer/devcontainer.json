@@ -1,0 +1,47 @@
+{
+  "name": "MyFlower Monorepo Dev",
+  "dockerComposeFile": "../docker-compose.yml",
+  "service": "backend",
+  "workspaceFolder": "/workspace",
+  "remoteUser": "root",
+  "updateRemoteUserUID": true,
+  "init": true,
+  "overrideCommand": false,
+  "mounts": [
+    "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=delegated",
+    // отдельный volume для node_modules, чтобы не терялись зависимости
+    "source=devcontainer-node-modules,target=/workspace/node_modules,type=volume"
+  ],
+  "remoteEnv": {
+    "TMPDIR": "/tmp",
+    "CI": "true",
+    "CHOKIDAR_USEPOLLING": "true",
+    "WATCHPACK_POLLING": "true"
+  },
+  "postCreateCommand": "pnpm install",
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "typescript.tsdk": "node_modules/typescript/lib",
+        "editor.formatOnSave": true,
+        "eslint.format.enable": true,
+        "eslint.workingDirectories": [{ "mode": "auto" }]
+      },
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "ms-vscode.vscode-typescript-next",
+        "usernamehw.errorlens",
+        "mhutchie.git-graph",
+        "yoavbls.pretty-ts-errors",
+        "ms-azuretools.vscode-docker"
+      ]
+    }
+  },
+  "forwardPorts": [5000, 5173],
+  "portsAttributes": {
+    "5000": { "label": "Backend API" },
+    "5173": { "label": "Frontend Dev Server" }
+  },
+  "shutdownAction": "stopCompose"
+}
