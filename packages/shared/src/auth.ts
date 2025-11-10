@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { Role } from "./user";
+import { Role } from "@myflower/backend/src/generated/prisma/client";
 
 export interface AuthPayload {
   id: number;

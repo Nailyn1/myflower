@@ -5,7 +5,7 @@ node_modules/
 .pnp.js
 .pnpm-debug.log*
 *.log
-
+.package-lock.json
 
 dist/
 build/
