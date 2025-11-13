@@ -1,4 +1,7 @@
-import { Role } from "@myflower/backend/src/generated/prisma/client";
+enum Role {
+  "USER",
+  "ADMIN",
+}
 
 export interface UserDTO {
   id: number;

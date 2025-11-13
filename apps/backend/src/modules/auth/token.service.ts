@@ -34,7 +34,6 @@ class TokenService {
 
     return {
       accessToken,
-      user: { id: userId, role },
     };
   }
 

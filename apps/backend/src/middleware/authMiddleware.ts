@@ -1,8 +1,8 @@
-import { Request, Response, NextFunction } from "express";
+import { Request, Response, NextFunction, RequestHandler } from "express";
 import { asyncHandler } from "./asyncHandler.js";
 import { verifyAccessToken } from "../utils/jwt.js";
 
-export const authMiddleware = (requiredRole?: string) =>
+export const authMiddleware = (requiredRole?: string): RequestHandler =>
   asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
     const authHeader = req.headers.authorization;
 

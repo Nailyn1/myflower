@@ -5,7 +5,7 @@
   "private": true,
   "main": "src/server.ts",
   "overrides": {
-    "glob": ">=8.0.0" 
+    "glob": ">=8.0.0"
   },
   "scripts": {
     "dev": "tsx watch --clear-screen=false src/server.ts",
@@ -16,7 +16,7 @@
     "test:clear": "jest --clearCache"
   },
   "dependencies": {
-    "@myflower/shared": "file:../../packages/shared",
+    "@myflower/shared": "file:../../packages/shared/dist/index.js",
     "@prisma/client": "^6.18.0",
     "bcryptjs": "^3.0.2",
     "cookie-parser": "^1.4.7",

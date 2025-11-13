@@ -9,7 +9,7 @@
     "resolveJsonModule": true,
     "baseUrl": ".",
     "paths": {
-      "@myflower/shared": ["packages/shared/src"],
+      "@myflower/shared": ["packages/shared/dist"],
       "@myflower/backend/*": ["./apps/backend/*"]
     }
   }

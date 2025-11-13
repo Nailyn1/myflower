@@ -1,10 +1,11 @@
 import { Request, Response } from "express";
 import { asyncHandler } from "../../middleware/asyncHandler.js";
 import authService from "./auth.service.js";
+import { RegisterInput } from "./auth.schema.js";
 
 class AuthController {
   register = asyncHandler(async (req: Request, res: Response) => {
-    const data = req.body;
+    const data: RegisterInput = req.body;
     await authService.register(data, res);
   });
 
@@ -19,14 +20,7 @@ class AuthController {
   });
 
   logout = asyncHandler(async (req: Request, res: Response) => {
-    const result = await authService.logout(req.user!.id);
-    res.clearCookie("refreshToken", {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      path: "/",
-    });
-    return res.json(result);
+    await authService.logout(req.user!.id, res);
   });
 }
 
