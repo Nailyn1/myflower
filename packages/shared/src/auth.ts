@@ -1,14 +1,7 @@
 import { z } from "zod";
-import { Role } from "@myflower/backend/src/generated/prisma/client";
-
-export interface AuthPayload {
-  id: number;
-  role: Role;
-}
 
 export interface LoginResponse {
   accessToken: string;
-  user: AuthPayload;
 }
 
 export const userAuthBaseSchema = z.object({
