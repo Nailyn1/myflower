@@ -14,3 +14,8 @@ export interface SendTokensInput {
   userId: number;
   role: Role;
 }
+
+export interface DecodedType {
+  id: number;
+  role: Role;
+}

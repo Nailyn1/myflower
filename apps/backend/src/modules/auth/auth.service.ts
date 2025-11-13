@@ -1,16 +1,21 @@
+import prisma from "../../prisma/prisma.service.js";
 import { verifyRefreshToken } from "../../utils/jwt.js";
 import { comparePassword, hashPassword } from "../../utils/password.js";
 import { authRepository } from "./auth.repository.js";
-import { LoginInput, RegisterInput } from "./auth.schema.js";
+import { DecodedType, LoginInput, RegisterInput } from "./auth.schema.js";
 import { tokenService } from "./token.service.js";
 import { Response } from "express";
 
 class AuthService {
   async register(data: RegisterInput, res: Response) {
-    const existingUser = await authRepository.findByEmail(data);
+    const { email } = data;
+
+    const existingUser = await authRepository.findByEmail(email);
 
     if (existingUser) {
-      throw new Error("User with this email already exists");
+      return res
+        .status(409)
+        .json({ message: "User with this email already exists" });
     }
 
     const hashedPassword = await hashPassword(data.password);
@@ -20,49 +25,70 @@ class AuthService {
       password: hashedPassword,
     });
 
-    return tokenService.sendTokens({
+    const tokens = await tokenService.sendTokens({
       res,
       userId: user.id,
       role: user.role,
     });
+    return res
+      .status(201)
+      .json({ message: "User successfully registered", ...tokens });
   }
 
   async login(data: LoginInput, res: Response) {
-    const user = await authRepository.findByEmail(data);
-
+    const { email } = data;
+    const user = await authRepository.findByEmail(email);
     if (!user) {
-      throw new Error("User not found");
+      return res.status(401).json({ message: "User does not exists" });
     }
 
     const isValidPassword = await comparePassword(data.password, user.password);
 
     if (!isValidPassword) {
-      throw new Error("Invalid credentials");
+      return res.status(401).json({ message: "Invalid password" });
     }
 
-    return tokenService.sendTokens({
+    const tokens = await tokenService.sendTokens({
       res,
       userId: user.id,
       role: user.role,
     });
+
+    return res
+      .status(201)
+      .json({ message: "Log in is succesfully", ...tokens });
   }
 
   async refresh(refreshToken: string, res: Response) {
-    if (!refreshToken) throw new Error("No refresh token");
+    if (!refreshToken)
+      return res.status(401).json({ message: "No refresh token provided" });
 
-    const decoded: any = verifyRefreshToken(refreshToken);
-    const { userId, role } = decoded;
+    let decoded;
+    try {
+      decoded = verifyRefreshToken(refreshToken);
+    } catch (error) {
+      return res
+        .status(401)
+        .json({ message: "Invalid or expired refresh token" });
+    }
 
-    return tokenService.sendTokens({
+    const { id, role } = decoded as DecodedType;
+
+    const tokens = await tokenService.sendTokens({
       res,
-      userId,
+      userId: id,
       role,
     });
+    console.log("tokens:", tokens);
+    return res
+      .status(201)
+      .json({ message: "RefreshToken is succesfully", ...tokens });
   }
 
-  async logout(userId: number) {
-    await authRepository.removeRefreshToken(userId);
-    return { message: "Logged out successfully" };
+  async logout(id: number, res: Response) {
+    await authRepository.removeRefreshToken(id);
+    await tokenService.clearTokens(res, id);
+    return res.status(201).json({ message: "Logout is succesfully" });
   }
 }
 
