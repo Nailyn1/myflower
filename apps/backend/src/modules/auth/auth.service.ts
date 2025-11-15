@@ -79,7 +79,7 @@ class AuthService {
       userId: id,
       role,
     });
-    console.log("tokens:", tokens);
+
     return res
       .status(201)
       .json({ message: "RefreshToken is succesfully", ...tokens });

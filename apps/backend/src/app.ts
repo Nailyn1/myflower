@@ -6,7 +6,7 @@ import morganMiddleware from "./middleware/morganLogger.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 
 import authRoutes from "./modules/auth/auth.routes.js";
-
+import userRoutes from "./modules/user/user.routes.js";
 const app: Application = express();
 
 app.use(helmet());
@@ -17,6 +17,7 @@ app.use(cookieParser());
 app.use(morganMiddleware);
 
 app.use("/api/auth", authRoutes);
+app.use("/api/user", userRoutes);
 
 app.use(errorHandler);
 
