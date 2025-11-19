@@ -9,11 +9,16 @@ class UserController {
 
   getUserById = asyncHandler(async (req: Request, res: Response) => {
     const userId = Number(req.params.id);
-    console.log("userID:", userId);
+
     if (isNaN(userId)) {
       return res.status(400).json({ message: "Invalid user ID format" });
     }
     await userService.getUserById(userId, res);
+  });
+
+  updatedUser = asyncHandler(async (req: Request, res: Response) => {
+    const userId = req.user!.id;
+    await userService.updateUser(userId, req.validatedData!, res);
   });
 }
 

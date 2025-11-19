@@ -1,3 +1,4 @@
+import { UserUpdateData } from "@myflower/shared";
 import { User } from "@prisma/client";
 
 declare global {
@@ -7,6 +8,7 @@ declare global {
         id: number;
         role: User["role"];
       };
+      validatedData?: UserUpdateData;
     }
   }
 }
