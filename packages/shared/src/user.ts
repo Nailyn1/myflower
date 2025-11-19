@@ -1,6 +1,6 @@
-enum Role {
-  "USER",
-  "ADMIN",
+export enum Role {
+  USER = "USER",
+  ADMIN = "ADMIN",
 }
 
 export interface UserDTO {
