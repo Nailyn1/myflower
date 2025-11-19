@@ -1,0 +1,123 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id Int @id @default(autoincrement())
+  name String
+  email String @unique
+  password String
+  role Role @default(USER)
+  refreshToken String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  comments Comments[]
+  likes Likes[] 
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model PlantType {
+  id Int @id @default(autoincrement())
+  name String
+  plants Plant[]
+}
+
+model Plant {
+  id Int @id @default(autoincrement())
+  name String
+  description String?
+  status PlantStatus
+  price Decimal?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  likesCount Int @default(0)
+  mainImage String?
+  typeId Int
+  type PlantType @relation(fields: [typeId], references: [id])
+  images PlantImage[]
+  comments Comments[] @relation("PlantComments")
+  likes Likes[] @relation("PlantLikes")
+  tags Tags[] @relation("PlantTags")
+}
+
+enum PlantStatus {
+  FOR_SALE
+  SOLD
+  COLLECTION
+}
+
+model PlantImage {
+  id       Int    @id @default(autoincrement())
+  imageUrl String
+  plantId  Int
+  plant    Plant  @relation(fields: [plantId], references: [id])
+}
+
+model Tags {
+  id Int @id @default(autoincrement())
+  name String
+  createdAt   DateTime         @default(now())
+  assignments TagAssignment[]
+
+  plantId Int?
+  plant Plant? @relation("PlantTags", fields: [plantId], references: [id]) 
+}
+
+model TagAssignment{
+  id          Int      @id @default(autoincrement())
+  tagId       Int
+  entityType  String   
+  entityId    Int
+  tags        Tags      @relation(fields: [tagId], references: [id])
+}
+
+model Comments {
+  id Int @id @default(autoincrement())
+  entityType EntityType
+  entityId Int
+  userId Int?
+  guestName String?
+  clientHash String?
+  text String
+  createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id])
+  
+  plantId Int?
+  plant Plant? @relation("PlantComments", fields: [plantId], references: [id])
+}
+
+model Likes {
+  id Int @id @default(autoincrement())
+  entityType EntityType
+  entityId Int
+  userId Int?
+  clientHash String?
+  createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id])
+  plantId Int?
+  plant Plant? @relation("PlantLikes", fields: [plantId], references: [id]) 
+}
+
+enum EntityType {
+  PLANT
+  ARTICLE
+}
+

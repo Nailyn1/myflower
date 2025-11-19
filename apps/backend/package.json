@@ -3,20 +3,49 @@
   "type": "module",
   "version": "1.0.0",
   "private": true,
-  "main": "src/index.ts",
+  "main": "src/server.ts",
+  "overrides": {
+    "glob": ">=8.0.0"
+  },
   "scripts": {
-    "dev": "tsx watch --clear-screen=false src/index.ts",
+    "dev": "tsx watch --clear-screen=false src/server.ts",
     "build": "tsc -p tsconfig.json",
-    "start": "node dist/index.js"
+    "start": "node dist/server.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:clear": "jest --clearCache"
   },
   "dependencies": {
+    "@myflower/shared": "file:../../packages/shared/dist/index.js",
+    "@prisma/client": "^6.18.0",
+    "bcryptjs": "^3.0.2",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.0",
     "express": "^4.18.2",
-    "@myflower/shared": "workspace:*",
-    "dotenv": "^16.0.0"
+    "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.1",
+    "winston": "^3.18.3",
+    "zod": "^4.1.12"
   },
   "devDependencies": {
-    "typescript": "^5.5.0",
-    "@types/express": "^4.17.17",
-    "tsx": "^4.20.6"
+    "@types/bcryptjs": "^3.0.0",
+    "@types/cookie-parser": "^1.4.10",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^4.17.23",
+    "@types/jest": "^30.0.0",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/morgan": "^1.9.10",
+    "@types/supertest": "^6.0.3",
+    "@types/winston": "^2.4.4",
+    "jest": "^30.2.0",
+    "prisma": "^6.18.0",
+    "react-is": "^19.2.0",
+    "supertest": "^7.1.4",
+    "ts-jest": "^29.4.5",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.20.6",
+    "typescript": "^5.5.0"
   }
 }

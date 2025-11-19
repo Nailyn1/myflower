@@ -1,9 +1,5 @@
 
 node_modules/
-.pnpm-store/
-.pnp.*
-.pnp.js
-.pnpm-debug.log*
 *.log
 
 
@@ -54,7 +50,7 @@ desktop.ini
 *.tmp
 *.orig
 
-.pnpm-store/
+
 npm-debug.log*
 yarn-error.log*
 lerna-debug.log*
