@@ -16,6 +16,7 @@
     "test:clear": "jest --clearCache"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.936.0",
     "@myflower/shared": "file:../../packages/shared/dist/index.js",
     "@prisma/client": "^6.18.0",
     "bcryptjs": "^3.0.2",
