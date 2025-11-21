@@ -9,6 +9,7 @@ declare global {
         role: User["role"];
       };
       validatedData?: UserUpdateData;
+      idempotencyKey?: string;
     }
   }
 }
