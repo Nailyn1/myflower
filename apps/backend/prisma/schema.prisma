@@ -47,8 +47,8 @@ model Plant {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   likesCount Int @default(0)
-  typeId Int
-  type PlantType @relation(fields: [typeId], references: [id])
+  typeId Int?
+  type PlantType? @relation(fields: [typeId], references: [id])
   images PlantImage[]
   comments Comments[] @relation("PlantComments")
   likes Likes[] @relation("PlantLikes")
