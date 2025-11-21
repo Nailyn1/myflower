@@ -122,3 +122,14 @@ enum EntityType {
   ARTICLE
 }
 
+model IdempotencyRecord {
+  id             Int   @id @default(autoincrement())
+  key         String   @unique
+  endpoint       String
+  requestHash    String
+  responseBody   Json?
+  responseStatus Int?
+  locked         Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
