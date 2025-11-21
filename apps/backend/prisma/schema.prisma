@@ -126,7 +126,7 @@ model IdempotencyRecord {
   id             Int   @id @default(autoincrement())
   key         String   @unique
   endpoint       String
-  requestHash    String
+  requestHash    String?
   responseBody   Json?
   responseStatus Int?
   locked         Boolean  @default(false)
