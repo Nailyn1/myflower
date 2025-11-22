@@ -68,6 +68,8 @@ model PlantImage {
   plant    Plant  @relation(fields: [plantId], references: [id])
   order Int
   main Boolean @default(false)
+
+  @@unique([plantId, order])
 }
 
 model Tags {
