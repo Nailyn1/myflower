@@ -1,8 +1,10 @@
-import { Response } from "express";
 import prisma from "../../prisma/prisma.service.js";
-import { CreatePlantDto } from "@myflower/shared";
+import {
+  CreatePlantDto,
+  CreatePlantTypeDto,
+  UpdatePlantTypeDto,
+} from "@myflower/shared";
 import { addPlantImage } from "./plants.schema.js";
-import { json } from "zod";
 
 type CreatePlantType = Pick<CreatePlantDto, "name" | "status">;
 
@@ -35,6 +37,31 @@ export const plantRepository = {
         responseStatus: status,
         locked: false,
         updatedAt: new Date(),
+      },
+    });
+  },
+  createPlantType: async (data: CreatePlantTypeDto) => {
+    return prisma.plantType.create({
+      data,
+    });
+  },
+  getAllPlantType: async () => {
+    return prisma.plantType.findMany({
+      orderBy: { id: "asc" },
+    });
+  },
+  updatePlantType: async (typeid: number, data: UpdatePlantTypeDto) => {
+    return prisma.plantType.update({
+      where: {
+        id: typeid,
+      },
+      data,
+    });
+  },
+  deletePlantType: async (typeId: number) => {
+    return prisma.plantType.deleteMany({
+      where: {
+        id: typeId,
       },
     });
   },

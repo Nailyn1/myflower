@@ -10,6 +10,10 @@ export const imageSchema = z.object({
 export const createPlantSchema = z.object({
   name: z.string().min(1),
   status: z.enum(["FOR_SALE", "COLLECTION"]),
+  // description: z.string().nullable().optional(),
+  // price: z.number().nullable().optional(),
+  // typeId: z.number().optional(),
+  // tags: z.array(z.number().optional()),
   images: z
     .array(imageSchema)
     .min(1, "At least one image required")
@@ -49,3 +53,21 @@ export const createPlantResponseSchema = z.object({
 });
 
 export type CreatePlantResponseDto = z.infer<typeof createPlantResponseSchema>;
+
+export const createPlantTypeSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+});
+
+export const plantTypeResponseSchema = z.object({
+  id: z.number(),
+  name: z.string(),
+});
+
+export type CreatePlantTypeDto = z.infer<typeof createPlantTypeSchema>;
+export type PlantTypeResponseDto = z.infer<typeof plantTypeResponseSchema>;
+
+export const updatePlantTypeSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+});
+
+export type UpdatePlantTypeDto = z.infer<typeof updatePlantTypeSchema>;

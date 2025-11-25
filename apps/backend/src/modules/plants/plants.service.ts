@@ -1,4 +1,9 @@
-import { CreatePlantDto, CreatePlantResponseDto } from "@myflower/shared";
+import {
+  CreatePlantDto,
+  CreatePlantResponseDto,
+  CreatePlantTypeDto,
+  UpdatePlantTypeDto,
+} from "@myflower/shared";
 import { Response } from "express";
 import { plantRepository } from "./plants.repository.js";
 import { generatePresignedUrls } from "../../libs/s3Service.js";
@@ -58,6 +63,32 @@ class PlantService {
     } catch (error) {
       return res.status(500).json({ message: "Failed to create plant" });
     }
+  }
+  async creatPlantType(data: CreatePlantTypeDto, idempotencyKey: string) {
+    const plantType = await plantRepository.createPlantType(data);
+
+    await plantRepository.updateIdempotencyRecord(
+      idempotencyKey,
+      plantType,
+      201
+    );
+
+    return plantType;
+  }
+
+  async getAllPlantTypes() {
+    const types = await plantRepository.getAllPlantType();
+    return types;
+  }
+
+  async updatePlantType(typeId: number, data: UpdatePlantTypeDto) {
+    const types = await plantRepository.updatePlantType(typeId, data);
+    return types;
+  }
+
+  async deletePlantType(typeId: number) {
+    const types = await plantRepository.deletePlantType(typeId);
+    return types;
   }
 }
 
