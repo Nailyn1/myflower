@@ -1,4 +1,4 @@
-import { UserUpdateData } from "@myflower/shared";
+import { UserUpdateData, CreatePlantDto } from "@myflower/shared";
 import { User } from "@prisma/client";
 
 declare global {
@@ -10,6 +10,7 @@ declare global {
       };
       validatedData?: UserUpdateData;
       idempotencyKey?: string;
+      plants?: CreatePlantDto;
     }
   }
 }

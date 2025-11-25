@@ -27,3 +27,25 @@ export const createPlantSchema = z.object({
 
 export type CreatePlantDto = z.infer<typeof createPlantSchema>;
 export type PlantImageDto = z.infer<typeof imageSchema>;
+
+export const presignedImageSchema = z.object({
+  fileName: z.string(),
+  key: z.string(),
+  order: z.number(),
+  main: z.boolean(),
+  uploadUrl: z.string(),
+  fields: z.record(z.string(), z.string()),
+});
+
+export const plantResponseSchema = z.object({
+  id: z.number(),
+  name: z.string(),
+  status: z.enum(["FOR_SALE", "COLLECTION"]),
+});
+
+export const createPlantResponseSchema = z.object({
+  plant: plantResponseSchema,
+  images: z.array(presignedImageSchema),
+});
+
+export type CreatePlantResponseDto = z.infer<typeof createPlantResponseSchema>;

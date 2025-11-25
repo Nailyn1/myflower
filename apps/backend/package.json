@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.540.0",
+    "@aws-sdk/s3-presigned-post": "^3.937.0",
     "@aws-sdk/s3-request-presigner": "^3.540.0",
     "@myflower/shared": "file:../../packages/shared/dist/index.js",
     "@prisma/client": "^6.18.0",

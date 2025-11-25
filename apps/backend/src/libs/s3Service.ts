@@ -12,6 +12,7 @@ export const generatePresignedUrls = async (
     uploadUrl: string;
     fields: Record<string, string>;
     key: string;
+    plantId: number;
   })[]
 > => {
   const bucket = process.env.S3_BUCKET_PUBLIC!;
@@ -19,6 +20,7 @@ export const generatePresignedUrls = async (
     uploadUrl: string;
     fields: Record<string, string>;
     key: string;
+    plantId: number;
   })[] = [];
 
   for (const img of images) {
@@ -35,7 +37,7 @@ export const generatePresignedUrls = async (
       Fields: { "Content-Type": img.mimeType },
     });
 
-    result.push({ ...img, key, uploadUrl: url, fields });
+    result.push({ ...img, key, uploadUrl: url, plantId, fields });
   }
 
   return result;

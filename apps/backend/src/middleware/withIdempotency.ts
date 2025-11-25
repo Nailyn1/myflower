@@ -27,7 +27,10 @@ export const idempotencyMiddleware = async (
           .json({ message: "Request is already in progress" });
       }
       if (record.responseBody && record.responseStatus) {
-        return res.status(record.responseStatus).json(record.responseBody);
+        if (typeof record.responseBody === "string") {
+          const responseData = JSON.parse(record.responseBody);
+          return res.status(record.responseStatus).json(responseData);
+        }
       }
     } else {
       await prisma.idempotencyRecord.create({
