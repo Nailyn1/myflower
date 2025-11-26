@@ -76,18 +76,8 @@ model Tags {
   id Int @id @default(autoincrement())
   name String
   createdAt   DateTime         @default(now())
-  assignments TagAssignment[]
 
-  plantId Int?
-  plant Plant? @relation("PlantTags", fields: [plantId], references: [id]) 
-}
-
-model TagAssignment{
-  id          Int      @id @default(autoincrement())
-  tagId       Int
-  entityType  String   
-  entityId    Int
-  tags        Tags      @relation(fields: [tagId], references: [id])
+  plant Plant[] @relation("PlantTags") 
 }
 
 model Comments {
