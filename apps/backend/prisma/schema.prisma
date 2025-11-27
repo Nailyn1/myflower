@@ -75,7 +75,6 @@ model PlantImage {
 model Tags {
   id Int @id @default(autoincrement())
   name String
-  createdAt   DateTime         @default(now())
 
   plant Plant[] @relation("PlantTags") 
 }
