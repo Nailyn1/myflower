@@ -65,4 +65,30 @@ export const plantRepository = {
       },
     });
   },
+
+  createPlantTags: async (data: CreatePlantTypeDto) => {
+    return prisma.tags.create({
+      data,
+    });
+  },
+  getAllPlantTags: async () => {
+    return prisma.tags.findMany({
+      orderBy: { id: "asc" },
+    });
+  },
+  updatePlantTags: async (typeid: number, data: UpdatePlantTypeDto) => {
+    return prisma.tags.update({
+      where: {
+        id: typeid,
+      },
+      data,
+    });
+  },
+  deletePlantTags: async (typeId: number) => {
+    return prisma.tags.deleteMany({
+      where: {
+        id: typeId,
+      },
+    });
+  },
 };

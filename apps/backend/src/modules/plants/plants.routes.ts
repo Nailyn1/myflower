@@ -35,4 +35,19 @@ router.patch(
 );
 router.delete("/types/:id", authMiddleware(), plantsController.deletePlantType);
 
+router.post(
+  "/tags",
+  validateSchema(createPlantTypeSchema),
+  authMiddleware(),
+  idempotencyMiddleware,
+  plantsController.createPlantTag
+);
+router.get("/tags", plantsController.getAllPlantTags);
+router.patch(
+  "/tags/:id",
+  authMiddleware(),
+  validateSchema(updatePlantTypeSchema),
+  plantsController.updatePlantTags
+);
+router.delete("/tags/:id", authMiddleware(), plantsController.deletePlantTags);
 export default router;

@@ -20,7 +20,7 @@ class PlantController {
     }
 
     const result = await plantsService.creatPlantType(data, idempotencyKey);
-    res.status(201).json({ message: result });
+    res.status(201).json(result);
   });
 
   updatePlantType = asyncHandler(async (req: Request, res: Response) => {
@@ -37,6 +37,32 @@ class PlantController {
   getAllPlantType = asyncHandler(async (req: Request, res: Response) => {
     const result = await plantsService.getAllPlantTypes();
     res.status(201).json(result);
+  });
+
+  createPlantTag = asyncHandler(async (req: Request, res: Response) => {
+    const data = req.body;
+    const idempotencyKey = req.idempotencyKey;
+    if (!idempotencyKey) {
+      return res.status(400).json({ error: "Idempotency-Key is required." });
+    }
+
+    const result = await plantsService.createTag(data, idempotencyKey);
+    res.status(201).json(result);
+  });
+  getAllPlantTags = asyncHandler(async (req: Request, res: Response) => {
+    const result = await plantsService.getAllPlantTags();
+    res.status(201).json(result);
+  });
+  updatePlantTags = asyncHandler(async (req: Request, res: Response) => {
+    const typeId = Number(req.params.id);
+    const data = req.body;
+    const result = await plantsService.updatePlantTags(typeId, data);
+    res.status(201).json(result);
+  });
+  deletePlantTags = asyncHandler(async (req: Request, res: Response) => {
+    const typeId = Number(req.params.id);
+    const result = await plantsService.deletePlantTags(typeId);
+    res.status(204).json(result);
   });
 }
 

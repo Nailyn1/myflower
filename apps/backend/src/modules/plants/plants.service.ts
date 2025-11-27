@@ -90,6 +90,33 @@ class PlantService {
     const types = await plantRepository.deletePlantType(typeId);
     return types;
   }
+
+  async createTag(data: CreatePlantTypeDto, idempotencyKey: string) {
+    const plantTags = await plantRepository.createPlantTags(data);
+
+    await plantRepository.updateIdempotencyRecord(
+      idempotencyKey,
+      plantTags,
+      201
+    );
+
+    return plantTags;
+  }
+
+  async getAllPlantTags() {
+    const PlantTags = await plantRepository.getAllPlantTags();
+    return PlantTags;
+  }
+
+  async updatePlantTags(typeId: number, data: UpdatePlantTypeDto) {
+    const PlantTags = await plantRepository.updatePlantTags(typeId, data);
+    return PlantTags;
+  }
+
+  async deletePlantTags(typeId: number) {
+    const PlantTags = await plantRepository.deletePlantTags(typeId);
+    return PlantTags;
+  }
 }
 
 export default new PlantService();
