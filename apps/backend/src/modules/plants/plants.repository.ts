@@ -1,22 +1,57 @@
+import { Prisma } from "../../generated/prisma/client.js";
 import prisma from "../../prisma/prisma.service.js";
 import {
   CreatePlantDto,
-  CreatePlantTypeDto,
+  CreatePlantTypeOrTagDto,
   UpdatePlantTypeDto,
 } from "@myflower/shared";
 import { addPlantImage } from "./plants.schema.js";
 
-type CreatePlantType = Pick<CreatePlantDto, "name" | "status">;
+type CreatePlantType = Pick<
+  CreatePlantDto,
+  "name" | "status" | "description" | "price" | "tags" | "typeId"
+>;
 
 export const plantRepository = {
   createPlant: async (data: CreatePlantType) => {
+    const plantData: Prisma.PlantCreateInput = {
+      name: data.name,
+      status: data.status,
+      description: data.description,
+      price: data.price,
+    };
+
+    if (data.typeId !== undefined && data.typeId !== null) {
+      plantData.type = {
+        connect: { id: data.typeId },
+      };
+    }
+
+    if (data.tags && data.tags.length > 0) {
+      plantData.tags = {
+        connect: data.tags.map((tagId) => ({ id: tagId })),
+      };
+    }
+
     return prisma.plant.create({
-      data: {
-        name: data.name,
-        status: data.status,
+      data: plantData,
+    });
+  },
+
+  findFullPlant: async (id: number) => {
+    return prisma.plant.findUniqueOrThrow({
+      where: { id },
+      include: {
+        type: {
+          select: { id: true, name: true },
+        },
+        tags: {
+          select: { id: true, name: true },
+        },
       },
     });
   },
+
   addPlantImage: async (data: addPlantImage) => {
     return prisma.plantImage.create({
       data,
@@ -40,7 +75,7 @@ export const plantRepository = {
       },
     });
   },
-  createPlantType: async (data: CreatePlantTypeDto) => {
+  createPlantType: async (data: CreatePlantTypeOrTagDto) => {
     return prisma.plantType.create({
       data,
     });
@@ -66,7 +101,7 @@ export const plantRepository = {
     });
   },
 
-  createPlantTags: async (data: CreatePlantTypeDto) => {
+  createPlantTags: async (data: CreatePlantTypeOrTagDto) => {
     return prisma.tags.create({
       data,
     });

@@ -10,10 +10,10 @@ export const imageSchema = z.object({
 export const createPlantSchema = z.object({
   name: z.string().min(1),
   status: z.enum(["FOR_SALE", "COLLECTION"]),
-  // description: z.string().nullable().optional(),
-  // price: z.number().nullable().optional(),
-  // typeId: z.number().optional(),
-  // tags: z.array(z.number().optional()),
+  description: z.string().nullable().optional(),
+  price: z.number().int().nonnegative().nullable().optional(),
+  typeId: z.number().int().positive().optional(),
+  tags: z.array(z.number().int().positive()).optional(),
   images: z
     .array(imageSchema)
     .min(1, "At least one image required")
@@ -32,6 +32,11 @@ export const createPlantSchema = z.object({
 export type CreatePlantDto = z.infer<typeof createPlantSchema>;
 export type PlantImageDto = z.infer<typeof imageSchema>;
 
+export const plantTypeOrTagResponseSchema = z.object({
+  id: z.number().int().positive(),
+  name: z.string(),
+});
+
 export const presignedImageSchema = z.object({
   fileName: z.string(),
   key: z.string(),
@@ -44,6 +49,10 @@ export const presignedImageSchema = z.object({
 export const plantResponseSchema = z.object({
   id: z.number(),
   name: z.string(),
+  description: z.string().nullable().optional(),
+  price: z.number().int().nonnegative().nullable().optional(),
+  type: plantTypeOrTagResponseSchema.nullable().optional(),
+  tags: z.array(plantTypeOrTagResponseSchema).optional(),
   status: z.enum(["FOR_SALE", "COLLECTION"]),
 });
 
@@ -54,17 +63,16 @@ export const createPlantResponseSchema = z.object({
 
 export type CreatePlantResponseDto = z.infer<typeof createPlantResponseSchema>;
 
-export const createPlantTypeSchema = z.object({
+export const createPlantTypeOrTagSchema = z.object({
   name: z.string().min(1, "Name is required"),
 });
 
-export const plantTypeResponseSchema = z.object({
-  id: z.number(),
-  name: z.string(),
-});
-
-export type CreatePlantTypeDto = z.infer<typeof createPlantTypeSchema>;
-export type PlantTypeResponseDto = z.infer<typeof plantTypeResponseSchema>;
+export type CreatePlantTypeOrTagDto = z.infer<
+  typeof createPlantTypeOrTagSchema
+>;
+export type PlantTypeOrTagResponseDto = z.infer<
+  typeof plantTypeOrTagResponseSchema
+>;
 
 export const updatePlantTypeSchema = z.object({
   name: z.string().min(1, "Name is required"),

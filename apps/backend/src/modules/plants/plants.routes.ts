@@ -5,7 +5,7 @@ import plantsController from "./plants.controller.js";
 import { validateSchema } from "../../middleware/validateSchema.js";
 import {
   createPlantSchema,
-  createPlantTypeSchema,
+  createPlantTypeOrTagSchema,
   updatePlantTypeSchema,
 } from "@myflower/shared";
 
@@ -21,7 +21,7 @@ router.post(
 
 router.post(
   "/types",
-  validateSchema(createPlantTypeSchema),
+  validateSchema(createPlantTypeOrTagSchema),
   authMiddleware(),
   idempotencyMiddleware,
   plantsController.createPlantType
@@ -37,7 +37,7 @@ router.delete("/types/:id", authMiddleware(), plantsController.deletePlantType);
 
 router.post(
   "/tags",
-  validateSchema(createPlantTypeSchema),
+  validateSchema(createPlantTypeOrTagSchema),
   authMiddleware(),
   idempotencyMiddleware,
   plantsController.createPlantTag

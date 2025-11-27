@@ -1,7 +1,7 @@
 import {
   CreatePlantDto,
   CreatePlantResponseDto,
-  CreatePlantTypeDto,
+  CreatePlantTypeOrTagDto,
   UpdatePlantTypeDto,
 } from "@myflower/shared";
 import { Response } from "express";
@@ -19,11 +19,19 @@ class PlantService {
       const dataUpdated = {
         name: data.name,
         status: data.status,
+        description: data.description,
+        price: data.price,
+        typeId: data.typeId,
+        tags: data.tags,
       };
 
-      const plant = await plantRepository.createPlant(dataUpdated);
+      const createdPlant = await plantRepository.createPlant(dataUpdated);
+      const fullPlant = await plantRepository.findFullPlant(createdPlant.id);
 
-      const presignedUrls = await generatePresignedUrls(plant.id, data.images);
+      const presignedUrls = await generatePresignedUrls(
+        createdPlant.id,
+        data.images
+      );
       const dbPromises = presignedUrls.map((urlData) => {
         const imageData: addPlantImage = {
           imageUrl: urlData.key,
@@ -36,20 +44,18 @@ class PlantService {
 
       await Promise.all(dbPromises);
 
+      const { createdAt, updatedAt, typeId, ...restOfPlant } = fullPlant;
+
       const responseData: CreatePlantResponseDto = {
         plant: {
-          id: plant.id,
-          name: plant.name,
-          status: plant.status as "FOR_SALE" | "COLLECTION",
+          ...restOfPlant,
+          price: restOfPlant.price ? restOfPlant.price.toNumber() : null,
+          status: restOfPlant.status as "FOR_SALE" | "COLLECTION",
         },
-        images: presignedUrls.map((item) => ({
-          fileName: item.fileName,
-          key: item.key,
-          order: item.order,
-          main: item.main,
-          uploadUrl: item.uploadUrl,
-          fields: item.fields,
-        })),
+        images: presignedUrls.map((item) => {
+          const { mimeType, plantId, ...rest } = item;
+          return rest;
+        }),
       };
       const responseStatus = 201;
 
@@ -64,7 +70,7 @@ class PlantService {
       return res.status(500).json({ message: "Failed to create plant" });
     }
   }
-  async creatPlantType(data: CreatePlantTypeDto, idempotencyKey: string) {
+  async creatPlantType(data: CreatePlantTypeOrTagDto, idempotencyKey: string) {
     const plantType = await plantRepository.createPlantType(data);
 
     await plantRepository.updateIdempotencyRecord(
@@ -91,7 +97,7 @@ class PlantService {
     return types;
   }
 
-  async createTag(data: CreatePlantTypeDto, idempotencyKey: string) {
+  async createTag(data: CreatePlantTypeOrTagDto, idempotencyKey: string) {
     const plantTags = await plantRepository.createPlantTags(data);
 
     await plantRepository.updateIdempotencyRecord(
