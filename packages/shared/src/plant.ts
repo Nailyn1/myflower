@@ -53,7 +53,7 @@ export const plantResponseSchema = z.object({
   price: z.number().int().nonnegative().nullable().optional(),
   type: plantTypeOrTagResponseSchema.nullable().optional(),
   tags: z.array(plantTypeOrTagResponseSchema).optional(),
-  status: z.enum(["FOR_SALE", "COLLECTION"]),
+  status: z.enum(["FOR_SALE", "COLLECTION", "SOLD"]),
 });
 
 export const createPlantResponseSchema = z.object({

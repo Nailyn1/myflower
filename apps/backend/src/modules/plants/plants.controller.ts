@@ -1,6 +1,7 @@
-import { Request, response, Response } from "express";
+import { Request, Response } from "express";
 import { asyncHandler } from "../../middleware/asyncHandler.js";
 import plantsService from "./plants.service.js";
+import { paginationSchema } from "@myflower/shared";
 
 class PlantController {
   createPlant = asyncHandler(async (req: Request, res: Response) => {
@@ -11,6 +12,13 @@ class PlantController {
     }
     await plantsService.createPlantById(data, idempotencyKey, res);
   });
+
+  getAllPlants = asyncHandler(async (req: Request, res: Response) => {
+    const { page, limit } = paginationSchema.parse(req.query);
+    const result = await plantsService.getAllPlants(page, limit);
+    res.status(201).json(result);
+  });
+  getPlantById = asyncHandler(async (req: Request, res: Response) => {});
 
   createPlantType = asyncHandler(async (req: Request, res: Response) => {
     const data = req.body;

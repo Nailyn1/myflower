@@ -12,12 +12,17 @@ import {
 const router: Router = Router();
 
 router.post(
-  "/create",
+  "/",
   validateSchema(createPlantSchema),
   authMiddleware(),
   idempotencyMiddleware,
   plantsController.createPlant
 );
+
+router.get("/", plantsController.getAllPlants);
+// router.get("/:id", plantsController.getPlantById);
+// router.patch("/:id")
+// router.delete("/:id",)
 
 router.post(
   "/types",

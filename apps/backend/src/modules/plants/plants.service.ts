@@ -2,6 +2,7 @@ import {
   CreatePlantDto,
   CreatePlantResponseDto,
   CreatePlantTypeOrTagDto,
+  GetPlantsResponseDto,
   UpdatePlantTypeDto,
 } from "@myflower/shared";
 import { Response } from "express";
@@ -67,9 +68,37 @@ class PlantService {
 
       return res.status(responseStatus).json(responseData);
     } catch (error) {
-      return res.status(500).json({ message: "Failed to create plant" });
+      return res.status(500).json({ message: "Failed to create plant", error });
     }
   }
+
+  async getAllPlants(page: number = 1, limit: number = 10) {
+    const skip: number = (page - 1) * limit;
+    console.log(skip);
+    const plants = await plantRepository.getAllPlants(skip, limit);
+
+    const totalCount = await plantRepository.totalCountPlants();
+    const result: GetPlantsResponseDto = {
+      data: plants.map((plant) => ({
+        id: plant.id,
+        name: plant.name,
+        description: plant.description,
+        status: plant.status,
+        price: plant.price ? Number(plant.price) : null,
+        imageUrl: plant.images[0]?.imageUrl || null,
+        type: plant.type,
+        tags: plant.tags,
+      })),
+      pagination: {
+        totalCount,
+        page,
+        limit,
+        totalPages: Math.ceil(totalCount / limit),
+      },
+    };
+    return result;
+  }
+
   async creatPlantType(data: CreatePlantTypeOrTagDto, idempotencyKey: string) {
     const plantType = await plantRepository.createPlantType(data);
 
