@@ -74,7 +74,6 @@ class PlantService {
 
   async getAllPlants(page: number = 1, limit: number = 10) {
     const skip: number = (page - 1) * limit;
-    console.log(skip);
     const plants = await plantRepository.getAllPlants(skip, limit);
 
     const totalCount = await plantRepository.totalCountPlants();
@@ -97,6 +96,10 @@ class PlantService {
       },
     };
     return result;
+  }
+
+  async getPlantsById(id: number) {
+    return await plantRepository.findPlantById(id);
   }
 
   async creatPlantType(data: CreatePlantTypeOrTagDto, idempotencyKey: string) {

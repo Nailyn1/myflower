@@ -52,6 +52,29 @@ export const plantRepository = {
     });
   },
 
+  findPlantById: async (id: number) => {
+    return prisma.plant.findUniqueOrThrow({
+      where: { id },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        status: true,
+        price: true,
+        images: {
+          where: { main: true },
+          select: { imageUrl: true },
+        },
+        type: {
+          select: { id: true, name: true },
+        },
+        tags: {
+          select: { id: true, name: true },
+        },
+      },
+    });
+  },
+
   getAllPlants: async (skip?: number, take?: number) => {
     return prisma.plant.findMany({
       skip,

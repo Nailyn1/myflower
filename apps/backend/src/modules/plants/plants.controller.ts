@@ -18,7 +18,11 @@ class PlantController {
     const result = await plantsService.getAllPlants(page, limit);
     res.status(201).json(result);
   });
-  getPlantById = asyncHandler(async (req: Request, res: Response) => {});
+  getPlantById = asyncHandler(async (req: Request, res: Response) => {
+    const plantId = Number(req.params.id);
+    const result = await plantsService.getPlantsById(plantId);
+    res.status(201).json(result);
+  });
 
   createPlantType = asyncHandler(async (req: Request, res: Response) => {
     const data = req.body;

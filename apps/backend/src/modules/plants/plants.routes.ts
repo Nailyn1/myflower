@@ -20,7 +20,7 @@ router.post(
 );
 
 router.get("/", plantsController.getAllPlants);
-// router.get("/:id", plantsController.getPlantById);
+router.get("/:id", plantsController.getPlantById);
 // router.patch("/:id")
 // router.delete("/:id",)
 
