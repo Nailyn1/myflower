@@ -65,7 +65,7 @@ model PlantImage {
   id       Int    @id @default(autoincrement())
   imageUrl String
   plantId  Int
-  plant    Plant  @relation(fields: [plantId], references: [id])
+  plant    Plant  @relation(fields: [plantId], references: [id], onDelete: Cascade)
   order Int
   main Boolean @default(false)
 
