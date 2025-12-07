@@ -38,8 +38,8 @@ export const plantTypeOrTagResponseSchema = z.object({
 });
 
 export const presignedImageSchema = z.object({
+  imageId: z.number().int().positive(),
   fileName: z.string(),
-  key: z.string(),
   order: z.number(),
   main: z.boolean(),
   uploadUrl: z.string(),

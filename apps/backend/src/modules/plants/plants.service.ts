@@ -45,7 +45,15 @@ class PlantService {
         return plantRepository.addPlantImage(imageData);
       });
 
-      await Promise.all(dbPromises);
+      const createdImages = await Promise.all(dbPromises);
+
+      const responseImages = presignedUrls.map((item, index) => {
+        const { mimeType, plantId, ...rest } = item;
+        return {
+          imageId: createdImages[index].id,
+          ...rest,
+        };
+      });
 
       const { createdAt, updatedAt, typeId, ...restOfPlant } = fullPlant;
 
@@ -55,10 +63,7 @@ class PlantService {
           price: restOfPlant.price ? restOfPlant.price.toNumber() : null,
           status: restOfPlant.status as "FOR_SALE" | "COLLECTION",
         },
-        images: presignedUrls.map((item) => {
-          const { mimeType, plantId, ...rest } = item;
-          return rest;
-        }),
+        images: responseImages,
       };
       const responseStatus = 201;
 
@@ -101,7 +106,14 @@ class PlantService {
   }
 
   async getPlantsById(id: number) {
-    return await plantRepository.findPlantById(id);
+    const result = await plantRepository.findPlantById(id);
+
+    const images = result.images.map(({ id, ...rest }) => ({
+      imageId: id,
+      ...rest,
+    }));
+
+    return { ...result, images };
   }
 
   async updatePlant(id: number, idempotencyKey: string, data: UpdatePlantDto) {

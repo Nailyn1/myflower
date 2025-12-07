@@ -63,7 +63,7 @@ export const plantRepository = {
         status: true,
         price: true,
         images: {
-          select: { imageUrl: true, order: true, main: true },
+          select: { id: true, imageUrl: true, order: true, main: true },
         },
         type: {
           select: { id: true, name: true },
