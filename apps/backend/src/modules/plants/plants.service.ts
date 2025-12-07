@@ -3,6 +3,8 @@ import {
   CreatePlantResponseDto,
   CreatePlantTypeOrTagDto,
   GetPlantsResponseDto,
+  UpdatePlantDto,
+  UpdatePlantResponseDto,
   UpdatePlantTypeDto,
 } from "@myflower/shared";
 import { Response } from "express";
@@ -100,6 +102,23 @@ class PlantService {
 
   async getPlantsById(id: number) {
     return await plantRepository.findPlantById(id);
+  }
+
+  async updatePlant(id: number, idempotencyKey: string, data: UpdatePlantDto) {
+    const prismaResult = await plantRepository.updatePlant(id, data);
+    const { price, ...restOfPlant } = prismaResult;
+    const updatedPlant: UpdatePlantResponseDto = {
+      ...restOfPlant,
+      price: prismaResult.price ? prismaResult.price.toNumber() : null,
+    };
+    const responseStatus = 200;
+
+    await plantRepository.updateIdempotencyRecord(
+      idempotencyKey,
+      updatedPlant,
+      responseStatus
+    );
+    return updatedPlant;
   }
 
   async creatPlantType(data: CreatePlantTypeOrTagDto, idempotencyKey: string) {

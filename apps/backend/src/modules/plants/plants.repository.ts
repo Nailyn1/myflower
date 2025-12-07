@@ -3,6 +3,7 @@ import prisma from "../../prisma/prisma.service.js";
 import {
   CreatePlantDto,
   CreatePlantTypeOrTagDto,
+  UpdatePlantDto,
   UpdatePlantTypeDto,
 } from "@myflower/shared";
 import { addPlantImage } from "./plants.schema.js";
@@ -62,8 +63,7 @@ export const plantRepository = {
         status: true,
         price: true,
         images: {
-          where: { main: true },
-          select: { imageUrl: true },
+          select: { imageUrl: true, order: true, main: true },
         },
         type: {
           select: { id: true, name: true },
@@ -98,6 +98,48 @@ export const plantRepository = {
         },
       },
     });
+  },
+
+  updatePlant: async (plantId: number, data: UpdatePlantDto) => {
+    const { typeId, tags, ...restOfData } = data;
+
+    const filteredScalars = Object.fromEntries(
+      Object.entries(restOfData).filter(([, value]) => value !== undefined)
+    );
+
+    const updateData: Prisma.PlantUpdateInput = filteredScalars;
+
+    if (typeId !== undefined) {
+      updateData.type = {
+        connect: { id: typeId },
+      };
+    }
+
+    if (tags !== undefined) {
+      updateData.tags = {
+        set: tags.map((tagId) => ({ id: tagId })),
+      };
+    }
+
+    const updatedPlant = await prisma.plant.update({
+      where: { id: plantId },
+      data: updateData,
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        status: true,
+        price: true,
+        type: {
+          select: { id: true, name: true },
+        },
+        tags: {
+          select: { id: true, name: true },
+        },
+      },
+    });
+
+    return updatedPlant;
   },
 
   totalCountPlants: async () => {

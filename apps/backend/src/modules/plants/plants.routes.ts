@@ -6,6 +6,7 @@ import { validateSchema } from "../../middleware/validateSchema.js";
 import {
   createPlantSchema,
   createPlantTypeOrTagSchema,
+  updatePlantSchema,
   updatePlantTypeSchema,
 } from "@myflower/shared";
 
@@ -20,8 +21,14 @@ router.post(
 );
 
 router.get("/", plantsController.getAllPlants);
-router.get("/:id", plantsController.getPlantById);
-// router.patch("/:id")
+router.get("/:id(\\d+)", plantsController.getPlantById);
+router.patch(
+  "/:id",
+  validateSchema(updatePlantSchema),
+  authMiddleware(),
+  idempotencyMiddleware,
+  plantsController.updatePlantById
+);
 // router.delete("/:id",)
 
 router.post(

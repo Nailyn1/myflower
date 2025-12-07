@@ -20,8 +20,28 @@ class PlantController {
   });
   getPlantById = asyncHandler(async (req: Request, res: Response) => {
     const plantId = Number(req.params.id);
+    if (!Number.isInteger(plantId) || plantId <= 0) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid plant id" });
+    }
     const result = await plantsService.getPlantsById(plantId);
     res.status(201).json(result);
+  });
+
+  updatePlantById = asyncHandler(async (req: Request, res: Response) => {
+    const plantId = Number(req.params.id);
+    const idempotencyKey = req.idempotencyKey;
+    const data = req.body;
+    if (!idempotencyKey) {
+      return res.status(400).json({ error: "Idempotency-Key is required." });
+    }
+    const result = await plantsService.updatePlant(
+      plantId,
+      idempotencyKey,
+      data
+    );
+    res.status(200).json(result);
   });
 
   createPlantType = asyncHandler(async (req: Request, res: Response) => {
