@@ -44,6 +44,12 @@ class PlantController {
     res.status(200).json(result);
   });
 
+  deletePlantById = asyncHandler(async (req: Request, res: Response) => {
+    const plantId = Number(req.params.id);
+    const result = await plantsService.deletePlant(plantId);
+    res.status(204).json(result);
+  });
+
   createPlantType = asyncHandler(async (req: Request, res: Response) => {
     const data = req.body;
     const idempotencyKey = req.idempotencyKey;

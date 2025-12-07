@@ -121,6 +121,11 @@ class PlantService {
     return updatedPlant;
   }
 
+  async deletePlant(plantId: number) {
+    const plant = await plantRepository.deletePlant(plantId);
+    return plant;
+  }
+
   async creatPlantType(data: CreatePlantTypeOrTagDto, idempotencyKey: string) {
     const plantType = await plantRepository.createPlantType(data);
 

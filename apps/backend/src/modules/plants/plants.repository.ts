@@ -142,6 +142,14 @@ export const plantRepository = {
     return updatedPlant;
   },
 
+  deletePlant: async (plantId: number) => {
+    return prisma.plant.deleteMany({
+      where: {
+        id: plantId,
+      },
+    });
+  },
+
   totalCountPlants: async () => {
     return prisma.plant.count();
   },

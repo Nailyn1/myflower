@@ -29,7 +29,7 @@ router.patch(
   idempotencyMiddleware,
   plantsController.updatePlantById
 );
-// router.delete("/:id",)
+router.delete("/:id(\\d+)", plantsController.deletePlantById);
 
 router.post(
   "/types",
