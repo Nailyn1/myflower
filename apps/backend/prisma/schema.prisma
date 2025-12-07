@@ -47,9 +47,8 @@ model Plant {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   likesCount Int @default(0)
-  mainImage String?
-  typeId Int
-  type PlantType @relation(fields: [typeId], references: [id])
+  typeId Int?
+  type PlantType? @relation(fields: [typeId], references: [id])
   images PlantImage[]
   comments Comments[] @relation("PlantComments")
   likes Likes[] @relation("PlantLikes")
@@ -66,25 +65,18 @@ model PlantImage {
   id       Int    @id @default(autoincrement())
   imageUrl String
   plantId  Int
-  plant    Plant  @relation(fields: [plantId], references: [id])
+  plant    Plant  @relation(fields: [plantId], references: [id], onDelete: Cascade)
+  order Int
+  main Boolean @default(false)
+
+  @@unique([plantId, order])
 }
 
 model Tags {
   id Int @id @default(autoincrement())
   name String
-  createdAt   DateTime         @default(now())
-  assignments TagAssignment[]
 
-  plantId Int?
-  plant Plant? @relation("PlantTags", fields: [plantId], references: [id]) 
-}
-
-model TagAssignment{
-  id          Int      @id @default(autoincrement())
-  tagId       Int
-  entityType  String   
-  entityId    Int
-  tags        Tags      @relation(fields: [tagId], references: [id])
+  plant Plant[] @relation("PlantTags") 
 }
 
 model Comments {
@@ -121,3 +113,14 @@ enum EntityType {
   ARTICLE
 }
 
+model IdempotencyRecord {
+  id             Int   @id @default(autoincrement())
+  key         String   @unique
+  endpoint       String
+  requestHash    String?
+  responseBody   Json?
+  responseStatus Int?
+  locked         Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}

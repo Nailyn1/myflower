@@ -7,6 +7,7 @@ import { errorHandler } from "./middleware/errorHandler.js";
 
 import authRoutes from "./modules/auth/auth.routes.js";
 import userRoutes from "./modules/user/user.routes.js";
+import plantRoutes from "./modules/plants/plants.routes.js";
 const app: Application = express();
 
 app.use(helmet());
@@ -18,7 +19,7 @@ app.use(morganMiddleware);
 
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
-
+app.use("/api/plants", plantRoutes);
 app.use(errorHandler);
 
 export default app;

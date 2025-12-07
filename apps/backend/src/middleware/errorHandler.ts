@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { ZodError } from "zod";
 import { logger } from "../config/logger.js";
-import { ZodIssue } from "zod/v3";
 
 export interface AppError extends Error {
   statusCode?: number;
