@@ -4,8 +4,10 @@ import { authMiddleware } from "../../middleware/authMiddleware.js";
 import plantsController from "./plants.controller.js";
 import { validateSchema } from "../../middleware/validateSchema.js";
 import {
+  addPlantImagesSchema,
   createPlantSchema,
   createPlantTypeOrTagSchema,
+  imageSchema,
   updatePlantSchema,
   updatePlantTypeSchema,
 } from "@myflower/shared";
@@ -62,4 +64,12 @@ router.patch(
   plantsController.updatePlantTags
 );
 router.delete("/tags/:id", authMiddleware(), plantsController.deletePlantTags);
+
+router.post(
+  "/:id/images",
+  validateSchema(addPlantImagesSchema),
+  authMiddleware(),
+  idempotencyMiddleware,
+  plantsController.createImgPlant
+);
 export default router;
