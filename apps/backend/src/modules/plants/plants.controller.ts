@@ -102,6 +102,21 @@ class PlantController {
     const result = await plantsService.deletePlantTags(typeId);
     res.status(204).json(result);
   });
+
+  createImgPlant = asyncHandler(async (req: Request, res: Response) => {
+    const plantId = Number(req.params.id);
+    const data = req.body;
+    const idempotencyKey = req.idempotencyKey;
+    if (!idempotencyKey) {
+      return res.status(400).json({ error: "Idempotency-Key is required." });
+    }
+    const result = await plantsService.createImg(
+      plantId,
+      idempotencyKey,
+      data.images
+    );
+    res.status(201).json(result);
+  });
 }
 
 export default new PlantController();

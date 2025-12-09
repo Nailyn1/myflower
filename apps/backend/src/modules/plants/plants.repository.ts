@@ -159,6 +159,7 @@ export const plantRepository = {
       data,
     });
   },
+
   updateIdempotencyRecord: async <T>(
     key: string,
     responseData: T,
@@ -187,6 +188,13 @@ export const plantRepository = {
       orderBy: { id: "asc" },
     });
   },
+
+  getPlantImagesById: async (plantId: number) => {
+    return prisma.plantImage.findMany({
+      where: { plantId: plantId },
+    });
+  },
+
   updatePlantType: async (typeid: number, data: UpdatePlantTypeDto) => {
     return prisma.plantType.update({
       where: {

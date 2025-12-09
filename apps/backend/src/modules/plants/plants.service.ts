@@ -3,6 +3,7 @@ import {
   CreatePlantResponseDto,
   CreatePlantTypeOrTagDto,
   GetPlantsResponseDto,
+  PlantImageDto,
   UpdatePlantDto,
   UpdatePlantResponseDto,
   UpdatePlantTypeDto,
@@ -11,6 +12,7 @@ import { Response } from "express";
 import { plantRepository } from "./plants.repository.js";
 import { generatePresignedUrls } from "../../libs/s3Service.js";
 import { addPlantImage } from "./plants.schema.js";
+import { NumberLiteralType } from "typescript";
 
 class PlantService {
   async createPlantById(
@@ -190,6 +192,82 @@ class PlantService {
   async deletePlantTags(typeId: number) {
     const PlantTags = await plantRepository.deletePlantTags(typeId);
     return PlantTags;
+  }
+
+  async createImg(
+    plantId: number,
+    idempotencyKey: string,
+    data: PlantImageDto[]
+  ) {
+    if (!Array.isArray(data)) {
+      throw new Error("images must be an array");
+    }
+
+    const existing = await plantRepository.getPlantImagesById(plantId);
+    const existingOrders = existing.map((i) => i.order);
+
+    const maxExistingOrder = existingOrders.length
+      ? Math.max(...existingOrders)
+      : -1;
+
+    const newOrders = data.map((i) => i.order);
+    const minNewOrder = Math.min(...newOrders);
+
+    if (minNewOrder !== maxExistingOrder + 1) {
+      throw new Error(
+        `New images must start with order ${
+          maxExistingOrder + 1
+        }, but got ${minNewOrder}`
+      );
+    }
+
+    const existingOrdersSet = new Set(existingOrders);
+    for (const img of data) {
+      if (existingOrdersSet.has(img.order)) {
+        throw new Error(`Order ${img.order} already exists`);
+      }
+    }
+
+    const hasMainInNew = data.some((i) => i.main);
+    const existingMain = existing.find((i) => i.main);
+
+    if (hasMainInNew && existingMain) {
+      throw new Error(
+        "This plant already has a main image. Change it via PATCH."
+      );
+    }
+
+    const presignedUrls = await generatePresignedUrls(plantId, data);
+
+    const dbPromises = presignedUrls.map((urlData) => {
+      const imageData: addPlantImage = {
+        imageUrl: urlData.key,
+        plantId: urlData.plantId,
+        order: urlData.order,
+        main: urlData.main,
+      };
+      return plantRepository.addPlantImage(imageData);
+    });
+
+    const createdImages = await Promise.all(dbPromises);
+
+    const responseImages = presignedUrls.map((item, index) => {
+      const { mimeType, plantId, ...rest } = item;
+      return {
+        imageId: createdImages[index].id,
+        ...rest,
+      };
+    });
+
+    const responseStatus = 201;
+
+    await plantRepository.updateIdempotencyRecord(
+      idempotencyKey,
+      responseImages,
+      responseStatus
+    );
+
+    return responseImages;
   }
 }
 
