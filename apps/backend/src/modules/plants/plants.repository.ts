@@ -1,8 +1,9 @@
-import { Prisma } from "../../generated/prisma/client.js";
+import { Prisma, PlantImage } from "../../generated/prisma/client.js";
 import prisma from "../../prisma/prisma.service.js";
 import {
   CreatePlantDto,
   CreatePlantTypeOrTagDto,
+  ReorderPlantImagesDto,
   UpdatePlantDto,
   UpdatePlantTypeDto,
 } from "@myflower/shared";
@@ -158,6 +159,36 @@ export const plantRepository = {
     return prisma.plantImage.create({
       data,
     });
+  },
+
+  reorderPlant: async (
+    plantId: number,
+    data: ReorderPlantImagesDto
+  ): Promise<PlantImage[]> => {
+    const nullifyOrders = prisma.plantImage.updateMany({
+      where: { plantId: plantId },
+      data: { order: null },
+    });
+
+    const updatePromises: Prisma.PrismaPromise<PlantImage>[] = data.images.map(
+      (imageUpdate) => {
+        return prisma.plantImage.update({
+          where: {
+            id: imageUpdate.imageId,
+            plantId: plantId,
+          },
+          data: {
+            order: imageUpdate.order,
+          },
+        });
+      }
+    );
+    const [_, ...updatedImages] = await prisma.$transaction([
+      nullifyOrders,
+      ...updatePromises,
+    ]);
+
+    return updatedImages;
   },
 
   updateIdempotencyRecord: async <T>(
