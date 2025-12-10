@@ -4,6 +4,7 @@ import {
   CreatePlantTypeOrTagDto,
   GetPlantsResponseDto,
   PlantImageDto,
+  ReorderPlantImagesDto,
   UpdatePlantDto,
   UpdatePlantResponseDto,
   UpdatePlantTypeDto,
@@ -268,6 +269,29 @@ class PlantService {
     );
 
     return responseImages;
+  }
+
+  async reorderImg(plantId: number, data: ReorderPlantImagesDto) {
+    const existing = await plantRepository.getPlantImagesById(plantId);
+
+    if (data.images.length !== existing.length) {
+      throw new Error(
+        `Client must send exactly ${existing.length} images for reordering, but received ${data.images.length}.`
+      );
+    }
+
+    const clientImageIds = new Set(data.images.map((i) => i.imageId));
+    const existingImageIds = new Set(existing.map((i) => i.id));
+    for (const id of clientImageIds) {
+      if (!existingImageIds.has(id)) {
+        throw new Error(
+          `Image ID ${id} in the request does not belong to plant ${existing[0].plantId} or does not exist.`
+        );
+      }
+    }
+
+    const responseData = await plantRepository.reorderPlant(plantId, data);
+    return responseData;
   }
 }
 
