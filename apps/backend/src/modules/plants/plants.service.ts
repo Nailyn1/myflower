@@ -5,6 +5,7 @@ import {
   GetPlantsResponseDto,
   PlantImageDto,
   ReorderPlantImagesDto,
+  SetMainImageDto,
   UpdatePlantDto,
   UpdatePlantResponseDto,
   UpdatePlantTypeDto,
@@ -280,6 +281,10 @@ class PlantService {
   ) {
     const existing = await plantRepository.getPlantImagesById(plantId);
 
+    if (existing.length === 0) {
+      throw new Error("This plant has no images");
+    }
+
     if (data.images.length !== existing.length) {
       throw new Error(
         `Client must send exactly ${existing.length} images for reordering, but received ${data.images.length}.`
@@ -296,7 +301,78 @@ class PlantService {
       }
     }
 
-    const responseData = await plantRepository.reorderPlant(plantId, data);
+    await plantRepository.reorderPlant(plantId, data);
+
+    const updatedImages = await plantRepository.getPlantImagesById(plantId);
+
+    const responseData = {
+      images: updatedImages.map((img) => ({
+        imageId: img.id,
+        imageUrl: img.imageUrl,
+        order: img.order,
+        main: img.main,
+        plantId: img.plantId,
+      })),
+    };
+
+    const responseStatus = 201;
+
+    await plantRepository.updateIdempotencyRecord(
+      idempotencyKey,
+      responseData,
+      responseStatus
+    );
+
+    return responseData;
+  }
+
+  async setMainPlant(
+    plantId: number,
+    idempotencyKey: string,
+    data: SetMainImageDto
+  ) {
+    const { imageId } = data;
+
+    const images = await plantRepository.getPlantImagesById(plantId);
+
+    if (images.length === 0) {
+      throw new Error("This plant has no images");
+    }
+
+    const target = images.find((i) => i.id === imageId);
+
+    if (!target) {
+      throw new Error("Image does not belong to this plant");
+    }
+
+    if (target.main === true) {
+      const responseData = {
+        message: "This image is already the main image",
+        imageId,
+      };
+
+      await plantRepository.updateIdempotencyRecord(
+        idempotencyKey,
+        responseData,
+        200
+      );
+
+      return responseData;
+    }
+
+    await plantRepository.setMainImage(plantId, imageId);
+    const updatedImages = await plantRepository.getPlantImagesById(plantId);
+
+    const responseData = {
+      images: updatedImages.map((img) => ({
+        imageId: img.id,
+        imageUrl: img.imageUrl,
+        order: img.order,
+        main: img.main,
+        plantId: img.plantId,
+      })),
+    };
+
     const responseStatus = 201;
 
     await plantRepository.updateIdempotencyRecord(

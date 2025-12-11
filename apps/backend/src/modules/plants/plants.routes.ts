@@ -9,6 +9,7 @@ import {
   createPlantTypeOrTagSchema,
   imageSchema,
   reorderPlantImageSchema,
+  setMainImageSchema,
   updatePlantSchema,
   updatePlantTypeSchema,
 } from "@myflower/shared";
@@ -79,6 +80,13 @@ router.patch(
   authMiddleware(),
   idempotencyMiddleware,
   plantsController.reorderImgPlant
+);
+router.patch(
+  "/:id/images/main",
+  validateSchema(setMainImageSchema),
+  authMiddleware(),
+  idempotencyMiddleware,
+  plantsController.setMainImgPlant
 );
 
 export default router;

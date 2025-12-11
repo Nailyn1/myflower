@@ -191,6 +191,22 @@ export const plantRepository = {
     return updatedImages;
   },
 
+  setMainImage: async (plantId: number, imageId: number) => {
+    return await prisma.$transaction(async (tx) => {
+      await tx.plantImage.updateMany({
+        where: { plantId },
+        data: { main: false },
+      });
+
+      const updated = await tx.plantImage.update({
+        where: { id: imageId },
+        data: { main: true },
+      });
+
+      return updated;
+    });
+  },
+
   updateIdempotencyRecord: async <T>(
     key: string,
     responseData: T,

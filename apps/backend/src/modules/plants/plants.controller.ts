@@ -1,7 +1,11 @@
 import { Request, Response } from "express";
 import { asyncHandler } from "../../middleware/asyncHandler.js";
 import plantsService from "./plants.service.js";
-import { paginationSchema, ReorderPlantImagesDto } from "@myflower/shared";
+import {
+  paginationSchema,
+  ReorderPlantImagesDto,
+  SetMainImageDto,
+} from "@myflower/shared";
 
 class PlantController {
   createPlant = asyncHandler(async (req: Request, res: Response) => {
@@ -126,6 +130,21 @@ class PlantController {
       return res.status(400).json({ error: "Idempotency-Key is required." });
     }
     const result = await plantsService.reorderImg(
+      plantId,
+      idempotencyKey,
+      data
+    );
+    res.status(201).json(result);
+  });
+
+  setMainImgPlant = asyncHandler(async (req: Request, res: Response) => {
+    const plantId = Number(req.params.id);
+    const data: SetMainImageDto = req.body;
+    const idempotencyKey = req.idempotencyKey;
+    if (!idempotencyKey) {
+      return res.status(400).json({ error: "Idempotency-Key is required." });
+    }
+    const result = await plantsService.setMainPlant(
       plantId,
       idempotencyKey,
       data
