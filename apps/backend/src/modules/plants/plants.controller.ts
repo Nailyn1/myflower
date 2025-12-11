@@ -121,13 +121,13 @@ class PlantController {
   reorderImgPlant = asyncHandler(async (req: Request, res: Response) => {
     const plantId = Number(req.params.id);
     const data: ReorderPlantImagesDto = req.body;
-    // const idempotencyKey = req.idempotencyKey;
-    // if (!idempotencyKey) {
-    //   return res.status(400).json({ error: "Idempotency-Key is required." });
-    // }
+    const idempotencyKey = req.idempotencyKey;
+    if (!idempotencyKey) {
+      return res.status(400).json({ error: "Idempotency-Key is required." });
+    }
     const result = await plantsService.reorderImg(
       plantId,
-      // idempotencyKey,
+      idempotencyKey,
       data
     );
     res.status(201).json(result);

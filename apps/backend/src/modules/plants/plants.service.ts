@@ -205,7 +205,9 @@ class PlantService {
     }
 
     const existing = await plantRepository.getPlantImagesById(plantId);
-    const existingOrders = existing.map((i) => i.order);
+    const existingOrders = existing
+      .map((i) => i.order)
+      .filter((o): o is number => o !== null);
 
     const maxExistingOrder = existingOrders.length
       ? Math.max(...existingOrders)
@@ -271,7 +273,11 @@ class PlantService {
     return responseImages;
   }
 
-  async reorderImg(plantId: number, data: ReorderPlantImagesDto) {
+  async reorderImg(
+    plantId: number,
+    idempotencyKey: string,
+    data: ReorderPlantImagesDto
+  ) {
     const existing = await plantRepository.getPlantImagesById(plantId);
 
     if (data.images.length !== existing.length) {
@@ -291,6 +297,14 @@ class PlantService {
     }
 
     const responseData = await plantRepository.reorderPlant(plantId, data);
+    const responseStatus = 201;
+
+    await plantRepository.updateIdempotencyRecord(
+      idempotencyKey,
+      responseData,
+      responseStatus
+    );
+
     return responseData;
   }
 }

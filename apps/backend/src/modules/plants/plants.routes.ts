@@ -77,7 +77,7 @@ router.patch(
   "/:id/images/reorder",
   validateSchema(reorderPlantImageSchema),
   authMiddleware(),
-  // idempotencyMiddleware,
+  idempotencyMiddleware,
   plantsController.reorderImgPlant
 );
 
