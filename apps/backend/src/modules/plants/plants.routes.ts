@@ -91,6 +91,7 @@ router.patch(
 router.delete(
   "/:id/images/:imageId",
   authMiddleware(),
+  idempotencyMiddleware,
   plantsController.deleteImgPlant
 );
 

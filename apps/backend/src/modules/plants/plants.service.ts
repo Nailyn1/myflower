@@ -385,7 +385,11 @@ class PlantService {
     return responseData;
   }
 
-  async deleteImgPlant(plantId: number, imageId: number) {
+  async deleteImgPlant(
+    plantId: number,
+    imageId: number,
+    idempotencyKey: string
+  ) {
     const images = await plantRepository.getPlantImagesById(plantId);
     if (images.length === 0) {
       throw new Error("This plant has no images");
@@ -447,6 +451,14 @@ class PlantService {
         main: img.main,
       })),
     };
+    const responseStatus = 200;
+
+    await plantRepository.updateIdempotencyRecord(
+      idempotencyKey,
+      responseData,
+      responseStatus
+    );
+
     return responseData;
   }
 }

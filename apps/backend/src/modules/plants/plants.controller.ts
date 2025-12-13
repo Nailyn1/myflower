@@ -155,7 +155,15 @@ class PlantController {
 
   deleteImgPlant = asyncHandler(async (req: Request, res: Response) => {
     const { id, imageId } = deleteImgParamsSchema.parse(req.params);
-    const result = await plantsService.deleteImgPlant(id, imageId);
+    const idempotencyKey = req.idempotencyKey;
+    if (!idempotencyKey) {
+      return res.status(400).json({ error: "Idempotency-Key is required." });
+    }
+    const result = await plantsService.deleteImgPlant(
+      id,
+      imageId,
+      idempotencyKey
+    );
     res.status(200).json(result);
   });
 }
