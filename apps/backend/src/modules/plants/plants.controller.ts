@@ -1,7 +1,12 @@
 import { Request, Response } from "express";
 import { asyncHandler } from "../../middleware/asyncHandler.js";
 import plantsService from "./plants.service.js";
-import { paginationSchema, ReorderPlantImagesDto } from "@myflower/shared";
+import {
+  paginationSchema,
+  ReorderPlantImagesDto,
+  SetMainImageDto,
+} from "@myflower/shared";
+import { deleteImgParamsSchema } from "./plants.schema.js";
 
 class PlantController {
   createPlant = asyncHandler(async (req: Request, res: Response) => {
@@ -121,16 +126,37 @@ class PlantController {
   reorderImgPlant = asyncHandler(async (req: Request, res: Response) => {
     const plantId = Number(req.params.id);
     const data: ReorderPlantImagesDto = req.body;
-    // const idempotencyKey = req.idempotencyKey;
-    // if (!idempotencyKey) {
-    //   return res.status(400).json({ error: "Idempotency-Key is required." });
-    // }
+    const idempotencyKey = req.idempotencyKey;
+    if (!idempotencyKey) {
+      return res.status(400).json({ error: "Idempotency-Key is required." });
+    }
     const result = await plantsService.reorderImg(
       plantId,
-      // idempotencyKey,
+      idempotencyKey,
       data
     );
     res.status(201).json(result);
+  });
+
+  setMainImgPlant = asyncHandler(async (req: Request, res: Response) => {
+    const plantId = Number(req.params.id);
+    const data: SetMainImageDto = req.body;
+    const idempotencyKey = req.idempotencyKey;
+    if (!idempotencyKey) {
+      return res.status(400).json({ error: "Idempotency-Key is required." });
+    }
+    const result = await plantsService.setMainPlant(
+      plantId,
+      idempotencyKey,
+      data
+    );
+    res.status(201).json(result);
+  });
+
+  deleteImgPlant = asyncHandler(async (req: Request, res: Response) => {
+    const { id, imageId } = deleteImgParamsSchema.parse(req.params);
+    const result = await plantsService.deleteImgPlant(id, imageId);
+    res.status(200).json(result);
   });
 }
 

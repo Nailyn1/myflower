@@ -5,15 +5,17 @@ import {
   GetPlantsResponseDto,
   PlantImageDto,
   ReorderPlantImagesDto,
+  ReorderPlantImagesResponseDto,
+  SetMainImageDto,
   UpdatePlantDto,
   UpdatePlantResponseDto,
   UpdatePlantTypeDto,
 } from "@myflower/shared";
-import { Response } from "express";
+import { response, Response } from "express";
 import { plantRepository } from "./plants.repository.js";
 import { generatePresignedUrls } from "../../libs/s3Service.js";
 import { addPlantImage } from "./plants.schema.js";
-import { NumberLiteralType } from "typescript";
+import prisma from "../../prisma/prisma.service.js";
 
 class PlantService {
   async createPlantById(
@@ -205,7 +207,9 @@ class PlantService {
     }
 
     const existing = await plantRepository.getPlantImagesById(plantId);
-    const existingOrders = existing.map((i) => i.order);
+    const existingOrders = existing
+      .map((i) => i.order)
+      .filter((o): o is number => o !== null);
 
     const maxExistingOrder = existingOrders.length
       ? Math.max(...existingOrders)
@@ -271,8 +275,16 @@ class PlantService {
     return responseImages;
   }
 
-  async reorderImg(plantId: number, data: ReorderPlantImagesDto) {
+  async reorderImg(
+    plantId: number,
+    idempotencyKey: string,
+    data: ReorderPlantImagesDto
+  ) {
     const existing = await plantRepository.getPlantImagesById(plantId);
+
+    if (existing.length === 0) {
+      throw new Error("This plant has no images");
+    }
 
     if (data.images.length !== existing.length) {
       throw new Error(
@@ -290,7 +302,151 @@ class PlantService {
       }
     }
 
-    const responseData = await plantRepository.reorderPlant(plantId, data);
+    await plantRepository.reorderPlant(plantId, data);
+
+    const updatedImages = await plantRepository.getPlantImagesById(plantId);
+
+    const responseData = {
+      images: updatedImages.map((img) => ({
+        imageId: img.id,
+        imageUrl: img.imageUrl,
+        order: img.order,
+        main: img.main,
+        plantId: img.plantId,
+      })),
+    };
+
+    const responseStatus = 201;
+
+    await plantRepository.updateIdempotencyRecord(
+      idempotencyKey,
+      responseData,
+      responseStatus
+    );
+
+    return responseData;
+  }
+
+  async setMainPlant(
+    plantId: number,
+    idempotencyKey: string,
+    data: SetMainImageDto
+  ) {
+    const { imageId } = data;
+
+    const images = await plantRepository.getPlantImagesById(plantId);
+
+    if (images.length === 0) {
+      throw new Error("This plant has no images");
+    }
+
+    const target = images.find((i) => i.id === imageId);
+
+    if (!target) {
+      throw new Error("Image does not belong to this plant");
+    }
+
+    if (target.main === true) {
+      const responseData = {
+        message: "This image is already the main image",
+        imageId,
+      };
+
+      await plantRepository.updateIdempotencyRecord(
+        idempotencyKey,
+        responseData,
+        200
+      );
+
+      return responseData;
+    }
+
+    await plantRepository.setMainImage(plantId, imageId);
+    const updatedImages = await plantRepository.getPlantImagesById(plantId);
+
+    const responseData = {
+      images: updatedImages.map((img) => ({
+        imageId: img.id,
+        imageUrl: img.imageUrl,
+        order: img.order,
+        main: img.main,
+        plantId: img.plantId,
+      })),
+    };
+
+    const responseStatus = 201;
+
+    await plantRepository.updateIdempotencyRecord(
+      idempotencyKey,
+      responseData,
+      responseStatus
+    );
+
+    return responseData;
+  }
+
+  async deleteImgPlant(plantId: number, imageId: number) {
+    const images = await plantRepository.getPlantImagesById(plantId);
+    if (images.length === 0) {
+      throw new Error("This plant has no images");
+    }
+
+    const target = images.find((i) => i.id === imageId);
+    if (!target) {
+      throw new Error("Image does not belong to this plant");
+    }
+
+    if (images.length === 1) {
+      throw new Error("Cannot delete the only image of this plant");
+    }
+
+    const isMain = target.main;
+    const targetOrder = target.order!;
+
+    const sortedImages = [...images].sort((a, b) => {
+      const orderA = a.order ?? 0;
+      const orderB = b.order ?? 0;
+      return orderA - orderB;
+    });
+
+    let newMainImageId: number | null = null;
+    if (isMain) {
+      const next = sortedImages.find((i) => i.order === targetOrder + 1);
+      const prev = sortedImages.find((i) => i.order === targetOrder - 1);
+
+      newMainImageId = next?.id ?? prev!.id;
+    }
+
+    const updatedImages = await prisma.$transaction(async (tx) => {
+      if (newMainImageId !== null) {
+        await plantRepository.unsetMainForPlant(tx, plantId);
+        await plantRepository.setMainImageTx(tx, newMainImageId);
+      }
+
+      await plantRepository.deleteImage(tx, imageId);
+
+      const remaining = await plantRepository.getImagesByPlantTx(tx, plantId);
+
+      for (let index = 0; index < remaining.length; index++) {
+        const img = remaining[index];
+        if (img.order !== index) {
+          await plantRepository.updateOrder(tx, img.id, index);
+        }
+      }
+
+      return await plantRepository.getImagesByPlantTx(tx, plantId);
+    });
+
+    console.log(updatedImages);
+
+    const responseData: ReorderPlantImagesResponseDto = {
+      images: updatedImages.map((img, index) => ({
+        imageId: img.id,
+        imageUrl: img.imageUrl,
+        order: img.order ?? index,
+        main: img.main,
+      })),
+    };
     return responseData;
   }
 }
