@@ -88,5 +88,10 @@ router.patch(
   idempotencyMiddleware,
   plantsController.setMainImgPlant
 );
+router.delete(
+  "/:id/images/:imageId",
+  authMiddleware(),
+  plantsController.deleteImgPlant
+);
 
 export default router;

@@ -74,3 +74,9 @@ export const reorderPlantImagesResponseSchema = z.object({
 export type ReorderPlantImagesResponseDto = z.infer<
   typeof reorderPlantImagesResponseSchema
 >;
+
+export const setMainImageSchema = z.object({
+  imageId: z.number().int().positive(),
+});
+
+export type SetMainImageDto = z.infer<typeof setMainImageSchema>;

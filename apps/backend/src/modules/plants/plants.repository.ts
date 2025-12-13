@@ -207,6 +207,44 @@ export const plantRepository = {
     });
   },
 
+  unsetMainForPlant: async (tx: Prisma.TransactionClient, plantId: number) => {
+    return tx.plantImage.updateMany({
+      where: { plantId },
+      data: { main: false },
+    });
+  },
+
+  setMainImageTx: async (tx: Prisma.TransactionClient, imageId: number) => {
+    return tx.plantImage.update({
+      where: { id: imageId },
+      data: { main: true },
+    });
+  },
+
+  deleteImage: async (tx: Prisma.TransactionClient, imageId: number) => {
+    return tx.plantImage.delete({
+      where: { id: imageId },
+    });
+  },
+
+  getImagesByPlantTx: async (tx: Prisma.TransactionClient, plantId: number) => {
+    return tx.plantImage.findMany({
+      where: { plantId },
+      orderBy: { order: "asc" },
+    });
+  },
+
+  updateOrder: async (
+    tx: Prisma.TransactionClient,
+    imageId: number,
+    order: number
+  ) => {
+    return tx.plantImage.update({
+      where: { id: imageId },
+      data: { order },
+    });
+  },
+
   updateIdempotencyRecord: async <T>(
     key: string,
     responseData: T,

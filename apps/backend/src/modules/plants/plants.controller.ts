@@ -6,6 +6,7 @@ import {
   ReorderPlantImagesDto,
   SetMainImageDto,
 } from "@myflower/shared";
+import { deleteImgParamsSchema } from "./plants.schema.js";
 
 class PlantController {
   createPlant = asyncHandler(async (req: Request, res: Response) => {
@@ -150,6 +151,12 @@ class PlantController {
       data
     );
     res.status(201).json(result);
+  });
+
+  deleteImgPlant = asyncHandler(async (req: Request, res: Response) => {
+    const { id, imageId } = deleteImgParamsSchema.parse(req.params);
+    const result = await plantsService.deleteImgPlant(id, imageId);
+    res.status(200).json(result);
   });
 }
 
