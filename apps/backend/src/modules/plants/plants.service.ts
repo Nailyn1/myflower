@@ -16,6 +16,7 @@ import { plantRepository } from "./plants.repository.js";
 import { generatePresignedUrls } from "../../libs/s3Service.js";
 import { addPlantImage } from "./plants.schema.js";
 import prisma from "../../prisma/prisma.service.js";
+import { BadRequestError, NotFoundError } from "../../errors/errors.js";
 
 class PlantService {
   async createPlantById(
@@ -392,16 +393,16 @@ class PlantService {
   ) {
     const images = await plantRepository.getPlantImagesById(plantId);
     if (images.length === 0) {
-      throw new Error("This plant has no images");
+      throw new BadRequestError("This plant has no images");
     }
 
     const target = images.find((i) => i.id === imageId);
     if (!target) {
-      throw new Error("Image does not belong to this plant");
+      throw new NotFoundError("Image does not belong to this plant");
     }
 
     if (images.length === 1) {
-      throw new Error("Cannot delete the only image of this plant");
+      throw new BadRequestError("Cannot delete the only image of this plant");
     }
 
     const isMain = target.main;
