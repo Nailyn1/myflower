@@ -7,7 +7,6 @@ import {
   addPlantImagesSchema,
   createPlantSchema,
   createPlantTypeOrTagSchema,
-  imageSchema,
   reorderPlantImageSchema,
   setMainImageSchema,
   updatePlantSchema,
